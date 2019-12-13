@@ -1,0 +1,14 @@
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Test\bin\Debug\netcoreapp2.0\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Test\bin\Debug\netcoreapp2.0\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Test\bin\Debug\netcoreapp2.0\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Test\bin\Debug\netcoreapp2.0\SHVRAPI.Test.deps.json
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Test\bin\Debug\netcoreapp2.0\SHVRAPI.Test.runtimeconfig.json
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Test\bin\Debug\netcoreapp2.0\SHVRAPI.Test.runtimeconfig.dev.json
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Test\bin\Debug\netcoreapp2.0\SHVRAPI.Test.dll
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Test\bin\Debug\netcoreapp2.0\SHVRAPI.Test.pdb
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Test\obj\Debug\netcoreapp2.0\SHVRAPI.Test.csprojAssemblyReference.cache
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Test\obj\Debug\netcoreapp2.0\SHVRAPI.Test.csproj.CoreCompileInputs.cache
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Test\obj\Debug\netcoreapp2.0\SHVRAPI.Test.AssemblyInfoInputs.cache
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Test\obj\Debug\netcoreapp2.0\SHVRAPI.Test.AssemblyInfo.cs
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Test\obj\Debug\netcoreapp2.0\SHVRAPI.Test.dll
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Test\obj\Debug\netcoreapp2.0\SHVRAPI.Test.pdb

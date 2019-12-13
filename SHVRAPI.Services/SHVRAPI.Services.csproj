@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <CodeAnalysisRuleSet>../../ca.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SHVRAPI.Data\SHVRAPI.Data.csproj" />
+    <ProjectReference Include="..\SHVRAPI.Core\SHVRAPI.Core.csproj" />
+    <ProjectReference Include="..\SHVRAPI.Data\SHVRAPI.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" />
+  </ItemGroup>
+</Project>
