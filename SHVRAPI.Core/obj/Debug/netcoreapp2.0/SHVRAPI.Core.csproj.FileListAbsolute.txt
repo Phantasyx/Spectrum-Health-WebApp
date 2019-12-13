@@ -1,0 +1,9 @@
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Core\bin\Debug\netcoreapp2.0\SHVRAPI.Core.deps.json
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Core\bin\Debug\netcoreapp2.0\SHVRAPI.Core.dll
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Core\bin\Debug\netcoreapp2.0\SHVRAPI.Core.pdb
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Core\obj\Debug\netcoreapp2.0\SHVRAPI.Core.csprojAssemblyReference.cache
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Core\obj\Debug\netcoreapp2.0\SHVRAPI.Core.csproj.CoreCompileInputs.cache
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Core\obj\Debug\netcoreapp2.0\SHVRAPI.Core.AssemblyInfoInputs.cache
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Core\obj\Debug\netcoreapp2.0\SHVRAPI.Core.AssemblyInfo.cs
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Core\obj\Debug\netcoreapp2.0\SHVRAPI.Core.dll
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Core\obj\Debug\netcoreapp2.0\SHVRAPI.Core.pdb

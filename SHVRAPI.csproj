@@ -1,0 +1,67 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <CodeAnalysisRuleSet>../../ca.ruleset</CodeAnalysisRuleSet>
+    <UserSecretsId>aspnet-SHVR-98ED8939-0AC1-4CD9-8D09-15AA6E26ACE1</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Areas\Admin\UploadFiles\**" />
+    <Content Remove="Areas\Admin\UploadFiles\**" />
+    <EmbeddedResource Remove="Areas\Admin\UploadFiles\**" />
+    <None Remove="Areas\Admin\UploadFiles\**" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.4" PrivateAssets="all">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" PrivateAssets="All" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
+    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0" />
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SHVRAPI.Core\SHVRAPI.Core.csproj" />
+    <ProjectReference Include="..\SHVRAPI.Data\SHVRAPI.Data.csproj" />
+    <ProjectReference Include="..\SHVRAPI.Services\SHVRAPI.Services.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="RESTControllers\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="Areas\Admin\Views\_ViewStart.cshtml" />
+    <Content Remove="Areas\Admin\Views\Account\AccessDenied.cshtml" />
+    <Content Remove="Areas\Admin\Views\Account\ConfirmEmail.cshtml" />
+    <Content Remove="Areas\Admin\Views\Account\ExternalLogin.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Areas\Public\Views\HomeController.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <HintPath>System</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel.Composition">
+      <HintPath>System.ComponentModel.Composition</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations">
+      <HintPath>System.ComponentModel.DataAnnotations</HintPath>
+    </Reference>
+    <Reference Include="System.Data">
+      <HintPath>System.Data</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+</Project>

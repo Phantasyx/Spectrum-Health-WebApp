@@ -1,0 +1,14 @@
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Data\bin\Debug\netcoreapp2.0\SHVRAPI.Data.deps.json
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Data\bin\Debug\netcoreapp2.0\SHVRAPI.Data.dll
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Data\bin\Debug\netcoreapp2.0\SHVRAPI.Data.pdb
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Data\obj\Debug\netcoreapp2.0\SHVRAPI.Data.csprojAssemblyReference.cache
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Data\obj\Debug\netcoreapp2.0\SHVRAPI.Data.csproj.CoreCompileInputs.cache
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Data\obj\Debug\netcoreapp2.0\SHVRAPI.Data.AssemblyInfoInputs.cache
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Data\obj\Debug\netcoreapp2.0\SHVRAPI.Data.AssemblyInfo.cs
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Data\obj\Debug\netcoreapp2.0\SHVRAPI.Data.dll
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Data\obj\Debug\netcoreapp2.0\SHVRAPI.Data.pdb
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Data\bin\Debug\netcoreapp2.0\SHVRAPI.Data.runtimeconfig.json
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Data\bin\Debug\netcoreapp2.0\SHVRAPI.Data.runtimeconfig.dev.json
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Data\bin\Debug\netcoreapp2.0\SHVRAPI.Core.dll
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Data\bin\Debug\netcoreapp2.0\SHVRAPI.Core.pdb
+C:\Users\X\Source\Repos\Fall2018MSU2\src\SHVRAPI.Data\obj\Debug\netcoreapp2.0\SHVRAPI.Data.csproj.CopyComplete
