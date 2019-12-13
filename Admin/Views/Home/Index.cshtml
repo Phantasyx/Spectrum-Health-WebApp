@@ -1,0 +1,485 @@
+﻿@addTagHelper"*, Microsoft.AspNetCore.Mvc.TagHelpers"
+@model List<SHVRAPI.Core.Models.Building>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+<script src="https://unpkg.com/sweetalert2@7.17.0/dist/sweetalert2.all.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+<script>
+    var img = null;
+    window.onload = function () {
+        var rects_1x = [];
+        var rects_1y = [];
+        var rects_2x = [];
+        var rects_2y = [];
+        var leftx = 0;
+        var rightx = 0;
+        var lefty = 0;
+        var righty = 0;
+
+        pic = document.getElementById('preview');
+        ctx = pic.getContext('2d'), rect = {}, drag = false;
+
+        var hitboxes = [];
+
+        function draw() {
+            ctx.globalAlpha = 1;
+
+            img = putImg();
+            if (img != null) {
+                ctx.globalAlpha = 0.4;
+
+                for (var i = 0; i < hitboxes.length; i++) {
+                    ctx.fillRect(hitboxes[i][0], hitboxes[i][1], hitboxes[i][2], hitboxes[i][3]);
+                    ctx.fillStyle = '#ADD8E6';
+                }
+
+                console.log(img);
+                ctx.fillRect(rect.startX, rect.startY, rect.w, rect.h);
+                ctx.fillStyle = '#ADD8E6';
+            }
+        }
+
+        x1 = 0;
+        x2 = 0;
+        y1 = 0;
+        y2 = 0;
+        pic.onmousedown = function (e) {
+            var evt = window.event || e;
+
+            rect.startX = evt.pageX - this.offsetLeft;
+            rect.startY = evt.pageY - this.offsetTop;
+            drag = true;
+
+            x1 = evt.pageX - (document.getElementById("preview").offsetLeft);
+            y1 = (document.getElementById("preview").offsetHeight) - (evt.pageY - (document.getElementById("preview").offsetTop));
+
+            var i
+            for (i = 0; i < rects_2x.length; i++) {
+                if (rects_1x[i] < rects_2x[i]) {
+                    leftx = rects_1x[i];
+                    rightx = rects_2x[i];
+                }
+
+                if (rects_2x[i] < rects_1x[i]) {
+                    leftx = rects_2x[i];
+                    rightx = rects_1x[i];
+                }
+
+                if (rects_1y[i] < rects_2y[i]) {
+                    lefty = rects_1y[i];
+                    righty = rects_2y[i];
+                }
+
+                if (rects_2y[i] < rects_1y[i]) {
+                    lefty = rects_2y[i];
+                    righty = rects_1y[i];
+                }
+
+                if (x1 < rightx && x1 > leftx) {
+                    if (y1 > lefty && y1 < righty) {
+                        document.getElementById("overlap").value = "1";
+                        rects_1x.splice(rects_1x.indexOf(x1), 1);
+                        rects_1y.splice(rects_1y.indexOf(y1), 1);
+                    }
+                }
+            }
+        }
+
+        pic.onmouseup = function (e) {
+            if (img == null) {
+                swal("Please upload an image first!");
+            }
+            drag = false;
+            var evt = window.event || e;
+
+            rect.endX = evt.pageX - this.offsetLeft;
+            rect.endY = evt.pageY - this.offsetTop;
+
+            x2 = evt.pageX - (document.getElementById("preview").offsetLeft);
+            y2 = (document.getElementById("preview").offsetHeight) - (evt.pageY - (document.getElementById("preview").offsetTop));
+
+            var i
+            for (i = 0; i < rects_2x.length; i++) {
+                if (rects_1x[i] < rects_2x[i]) {
+                    leftx = rects_1x[i];
+                    rightx = rects_2x[i];
+                }
+
+                if (rects_2x[i] < rects_1x[i]) {
+                    leftx = rects_2x[i];
+                    rightx = rects_1x[i];
+                }
+
+                if (rects_1y[i] < rects_2y[i]) {
+                    lefty = rects_1y[i];
+                    righty = rects_2y[i];
+                }
+
+                if (rects_2y[i] < rects_1y[i]) {
+                    lefty = rects_2y[i];
+                    righty = rects_1y[i];
+                }
+
+                if (x2 < rightx && x2 > leftx) {
+                    if (y2 > lefty && y2 < righty) {
+                        document.getElementById("overlap").value = "1";
+                        rects_2x.splice(rects_2x.indexOf(x2), 1);
+                        rects_2y.splice(rects_2y.indexOf(y2), 1);
+                    }
+                }
+                if (document.getElementById("overlap").value == 0) {
+
+                }
+            }
+        }
+
+        pic.onmousemove = function (e) {
+            var evt = window.event || e;
+            if (drag) {
+                rect.w = (evt.pageX - this.offsetLeft) - rect.startX;
+                rect.h = (evt.pageY - this.offsetTop) - rect.startY;
+                rect.colo
+                ctx.clearRect(0, 0, pic.width, pic.height);
+                draw();
+            }
+        }
+
+        function putImg() {
+            if (img != null) {
+                base_image = new Image();
+                base_image.src = img;
+                ctx.drawImage(base_image, 0, 0, base_image.width, base_image.height,     // source rectangle
+                    0, 0, pic.width, pic.height);
+                return img;
+            }
+            else {
+                return null;
+            }
+        }
+
+        var hitboxinfo = [];
+        var storedhitboxes = [];
+        document.getElementById("sethitbox").addEventListener("click", storehitbox);
+        function storehitbox() {
+            var hitboxtitle = document.getElementById("hitboxtitle").value;
+            var hitboxtext = document.getElementById("hitboxtext").value;
+
+            if (document.getElementById("overlap").value == 0) {
+                rects_2x.push(x2);
+                rects_2y.push(y2);
+                rects_1x.push(x1);
+                rects_1y.push(y1);
+                var rec = [rect.startX, rect.startY, rect.w, rect.h];
+                if (hitboxtitle == "") {
+                    swal("Please add title text!");
+                }
+                else if (hitboxtext == "") {
+                    swal("Please add description text!");
+                }
+                else if (x1 == 0 && x2 == 0 && y1 == 0 && y2 == 0) {
+                    swal("Please make a selection on the image!");
+                }
+                else {
+                    // Get the hitbox points no matter the direction
+                    var x2scaled = 1 - x1 / pic.width;
+                    var x1scaled = 1 - x2 / pic.width;
+                    var y1scaled = y1 / pic.height;
+                    var y2scaled = y2 / pic.height;
+
+                    var topy;
+                    var boty;
+                    var leftx;
+                    var rightx;
+
+                    // Figure out which point is right vs left
+                    if (x2scaled > x1scaled) {
+                        rightx = x2scaled;
+                        leftx = x1scaled;
+                    }
+                    else {
+                        rightx = x1scaled;
+                        leftx = x2scaled;
+                    }
+
+                    // Figure out which point is top vs bottom
+                    if (y1scaled > y2scaled) {
+                        topy = y1scaled;
+                        boty = y2scaled;
+                    }
+                    else {
+                        topy = y2scaled;
+                        boty = y1scaled;
+                    }
+
+                    // Store all of the data for this hitbox into an array
+                    hitboxinfo = [topy, boty, leftx, rightx, hitboxtitle, hitboxtext];
+
+                    // Make the delimiter a * instead of a comma to avoid errors 
+                    // in the text portion
+                    var joined = hitboxinfo.join("*");
+
+                    // Push the hitbox info into the array of all hitboxes
+                    storedhitboxes.push(joined);
+                    var sendhitboxes = storedhitboxes.join("^");
+
+                    hitboxes.push(rec);
+                    hitboxinfo = [];
+                    swal("Set hitbox successfully!", storedhitboxes.length + " hitbox(es) set.", "success");
+
+                    document.getElementById('allhbs').setAttribute("value", sendhitboxes);
+
+                    // Empty the text boxes for the next hitbox
+                    document.getElementById("hitboxtitle").value = "";
+                    document.getElementById("hitboxtext").value = "";
+                }
+            }
+            else {
+                swal("Hitboxes overlap! Please select again.");
+                document.getElementById("overlap").value = 0;
+            }
+        } //store multiple hitboxes
+
+        function getMessage() {
+            var text = "";
+            for (var i = 0; i < storedhitboxes.length; i++) {
+                text += "hitbox" + (i + 1) + ":\n";
+                text += "coordinates: " + storedhitboxes[i][0] + " ," + storedhitboxes[i][1] + " ," + storedhitboxes[i][2] + " ," + storedhitboxes[i][3] + "\n";
+                text += "title: " + storedhitboxes[i][4] + "\n";
+                text += "text: " + storedhitboxes[i][5] + "\n";
+            }
+            return text;
+        } //save hitbox info
+
+        reset = document.getElementById('reset');
+        reset.onclick = function () {
+            document.getElementById("overlap").value = 0;
+            // Empty the array of hitboxes
+            storedhitboxes.length = 0;
+            document.getElementById('allhbs').setAttribute("value", storedhitboxes);
+            hitboxes.length = 0;
+            rects_1x.length = 0;
+            rects_1y.length = 0;
+            rects_2x.length = 0;
+            rects_2y.length = 0;
+
+            ctx.globalAlpha = 1;
+
+            img = putImg();
+            if (img != null) {
+                ctx.globalAlpha = 0.4;
+            }
+
+            // Empty the text boxes for the next hitbox
+            document.getElementById("hitboxtitle").value = "";
+            document.getElementById("hitboxtext").value = "";
+        } // clear all hitboxes
+    }
+</script>
+
+
+<nav class="navbar navbar-light" style="background-color: #e3f2fd;">
+    <span class="navbar-brand mb-0 h1">VR Administrator Access</span>
+</nav>
+
+<div>
+    <div align="left">
+        <style type="text/css">
+            .border {
+                border: solid;
+                border: dashed red;
+                border: 1rem solid;
+                border: thick double #009900;
+                border: 4mm ridge rgb(170, 50, 220, .6);
+            }
+        </style>
+        <div class=" image">
+            <canvas id="preview" width="1080" height="475" class="border" </canvas>
+        </div>
+    </div>
+    <input type="hidden" id="overlap" name="overlap" value="0">
+</div>
+
+<!-- Left col -->
+<div class="col-md-6">
+    <div class="card">
+        <div class="card-header">
+            <strong class="card-title">Room Information</strong>
+        </div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush" id="infos">
+                <li class="list-group-item">
+
+                    <form method="post" enctype="multipart/form-data" asp-controller="Home" asp-action="CreateEntry">
+
+                        <div class="form-group">
+                            <div class="col-md-10">
+                                <p>Upload the image:</p>
+                                <input type="file" accept="image/*" name="pre" id="pre" required />
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="hbs" id="allhbs" />
+                        <input type="hidden" name="buildName" id="buildName" />
+
+                        <table>
+                            <tr>
+                                <td>Building : </td>
+                                <td>
+                                    <!-- The Dropdown List -->
+                                    @{
+                                        List<SelectListItem> buildingsList = new List<SelectListItem>();
+                                        @foreach (var building in Model)
+                                        {
+                                            buildingsList.Add(new SelectListItem { Text = building.Name, Value = (building.Id - 1).ToString() });
+                                        }
+                                        buildingsList.Add(new SelectListItem { Text = "Add new building", Value = "newbuilding" });
+                                    }
+
+                                    @Html.DropDownList("build", buildingsList, "Select Building", new { @style = "font-size: 20px;", required = "required" })
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td>Room : </td>
+                                <td><input name="roomName" type="text" id="roomtext" placeholder="Room 237..." maxlength="25" required /></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><input id="Submit1" type="submit" value="Upload" /></td>
+                            </tr>
+                        </table>
+                    </form>
+
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Right col -->
+<div class="col-md-6">
+    <div class="card">
+        <div class="card-header">
+            <strong class="card-title">Hitbox Operations</strong>
+        </div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush" id="operations">
+                <li class="list-group-item">
+                    <table>
+                        <tr>
+                            <td>Title : </td>
+                            <td><input name="txt" type="text" id="hitboxtitle" placeholder="Name of the Object" maxlength="25" /></td>
+                        </tr>
+                        <tr>
+                            <td>Description : </td>
+                            <td><textarea name="txtSub" type="text" id="hitboxtext" placeholder="Add Description Here" maxlength="70"></textarea> </td>
+                        </tr>
+                    </table>
+                    <div>
+                        <button type="button" class="btn btn-secondary" id="sethitbox">Set Hitbox to image</button>
+                    </div>
+                    &nbsp;
+                    <div>
+                        <button type="button" class="btn btn-secondary" id="reset">Reset</button>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Show the preview image
+    document.getElementById("pre").onchange = function ()
+    {
+        console.log(document.getElementById("pre"));
+        var reader = new FileReader();
+
+        reader.onload = function (e)
+        {
+            img = e.target.result;
+
+            var canvas = document.getElementById('preview'),
+                context = canvas.getContext('2d');
+
+            make_base();
+
+            function make_base()
+            {
+                base_image = new Image();
+                base_image.src = e.target.result;
+                base_image.onload = function ()
+                {
+                    context.drawImage(base_image, 0, 0, base_image.width, base_image.height,     // source rectangle
+                        0, 0, canvas.width, canvas.height);
+                }
+            }
+        };
+
+        // read the image file as a data URL.
+        reader.readAsDataURL(this.files[0]);
+    };
+
+    // Dropdown changes
+    var dropdown = document.getElementById("build");
+    dropdown.onchange = function ()
+    {
+        if (dropdown.value == "newbuilding") {
+            // when add new building is selected
+            // pop sweet alert with text box
+            var swalField = document.createElement('input');
+            swalField.setAttribute("placeholder", "Enter new building name");
+            swalField.maxLength = 45;
+            swal({
+                title: "Add a new building",
+                buttons:
+                {
+                    cancel:
+                    {
+                        text: "Cancel",
+                        value: 0,
+                        visible: true,
+                        closeModal: true
+                    },
+
+                    upload:
+                    {
+                        text: "Upload",
+                        value: 1,
+                        visible: true,
+                        closeModal: true
+                    },
+
+                },
+                content: swalField,
+                dangerMode: true
+            }).then(value => {
+                let buildingname = swalField.value; // save input value as variable.
+                switch (value) {
+                    case 0: // when user click cancel
+                        dropdown.value = ''; // dropdown goes back to empty
+                        break;
+                    case 1: // when user presses upload do:
+                        swal("New building added: ", buildingname, "success");
+                        // upload new building to db
+
+                        for (i = 0; i < dropdown.length; i++) {
+                            if (dropdown.options[i].value == 'newbuilding') // remove addnewbuilding option and add new option as new building name
+                            {
+                                dropdown.remove(i);
+                                var option = document.createElement("option");
+                                option.text = buildingname;
+                                document.getElementById('buildName').setAttribute("value", buildingname);
+                                dropdown.add(option);
+                            }
+                        }
+                }
+            });
+        }
+        else
+        {
+            // User selected a pre-existing building
+            document.getElementById('buildName').setAttribute("value", dropdown.value);
+        }
+    }
+</script>

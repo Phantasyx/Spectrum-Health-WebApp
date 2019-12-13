@@ -1,0 +1,55 @@
+﻿@model SHVRAPI.Areas.Public.Controllers.GetController
+
+@{
+    ViewData["Title"] = "Delete a Building/Room | ";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Delete a Building/Room</h1>
+@{
+    List<Building> buildings = Model.GetBuildings();
+    foreach (var building in buildings)
+    {
+        <h2>@building.Name</h2>
+        <h3><a asp-area="admin" asp-controller="Home" asp-action="BuildingDeleted" asp-route-buildingid="@building.Id" class="confirmationB"> Delete this building? </a></h3>
+
+        List<Room> rooms = Model.GetRooms(building.Id);
+        foreach (var room in rooms)
+        {
+            <h3><a asp-area="public" asp-controller="Home" asp-action="RoomVR" asp-route-roomid="@room.Id" class="confirmation"> @room.Name </a></h3>
+            <h3><a asp-area="admin" asp-controller="Home" asp-action="RoomDeleted" asp-route-roomid="@room.Id" class="confirmationR"> Delete this room? </a></h3>
+            <img class="reframe" src="@room.ImageFile" alt="ASP.NET">
+            <br />
+        }
+    }
+}
+
+
+<script type="text/javascript">
+    // Warning that pops up after a user clicks one of the room links
+    var elems = document.getElementsByClassName('confirmation');
+    var confirmIt = function (e) {
+        if (!confirm('Warning: The page will go into fullscreen. Press Ok to continue. You can return to this page by pressing the back button in the upper left.')) e.preventDefault();
+    };
+    for (var j = 0, l = elems.length; j < l; j++) {
+        elems[j].addEventListener('click', confirmIt, false);
+    }
+
+    // Warning that pops up after a user clicks one of the delete room links
+    var elems = document.getElementsByClassName('confirmationR');
+    var confirmIt = function (e) {
+        if (!confirm('Warning: You are about to delete a room! Press Ok to continue.')) e.preventDefault();
+    };
+    for (var j = 0, l = elems.length; j < l; j++) {
+        elems[j].addEventListener('click', confirmIt, false);
+    }
+
+    // Warning that pops up after a user clicks one of the delete building links
+    var elems = document.getElementsByClassName('confirmationB');
+    var confirmIt = function (e) {
+        if (!confirm('Warning: You are about to delete a building! Press Ok to continue.')) e.preventDefault();
+    };
+    for (var j = 0, l = elems.length; j < l; j++) {
+        elems[j].addEventListener('click', confirmIt, false);
+    }
+</script>
