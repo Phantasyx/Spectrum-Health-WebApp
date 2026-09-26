@@ -7,6 +7,7 @@ import {
   imageRectToHitbox,
   lookYawPitch,
   projectDirection,
+  panoramaPoint,
   uvFromDirection,
 } from '../src/coords.js';
 import { sampleCatalog } from '../src/scenes.js';
@@ -25,6 +26,15 @@ test('equirectangular UV round-trips through a direction', () => {
     assert.ok(Math.abs(uv.u - u) < 1e-6, `u ${uv.u} vs ${u}`);
     assert.ok(Math.abs(uv.v - v) < 1e-6, `v ${uv.v} vs ${v}`);
   }
+});
+
+test('the center of a 360 photo sits in front of the A-Frame camera', () => {
+  const [x, y, z] = panoramaPoint(0.5, 0.5);
+  assert.ok(Math.abs(x) < 1e-6);
+  assert.ok(Math.abs(y) < 1e-6);
+  assert.ok(Math.abs(z + 1) < 1e-6);
+  const above = panoramaPoint(0.5, 0.38);
+  assert.ok(above[1] > 0.2);
 });
 
 test('a direction in front of the camera projects to the center', () => {

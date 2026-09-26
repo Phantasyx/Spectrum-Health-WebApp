@@ -12,5 +12,8 @@
   "devDependencies": {
     "vite": "^6.3.5",
     "wrangler": "^4.40.0"
+  },
+  "dependencies": {
+    "aframe": "^1.7.1"
   }
 }

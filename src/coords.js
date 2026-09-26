@@ -74,6 +74,21 @@ export function hitboxesOverlap(a, b) {
   return !separated;
 }
 
+/**
+ * Point on the A-Frame sky for an equirectangular UV.
+ * a-sky is a back-facing sphere scaled (-1, 1, 1) and turned -90° on Y,
+ * so u = 0.5, v = 0.5 sits on the camera's forward axis.
+ */
+export function panoramaPoint(u, v, radius = 1) {
+  const phi = u * TAU;
+  const theta = v * Math.PI;
+  const sinTheta = Math.sin(theta);
+  const x = Math.cos(phi) * sinTheta;
+  const y = Math.cos(theta);
+  const z = Math.sin(phi) * sinTheta;
+  return [-z * radius, y * radius, x * radius];
+}
+
 export function lookYawPitch([x, y, z]) {
   const len = Math.hypot(x, y, z) || 1;
   return {

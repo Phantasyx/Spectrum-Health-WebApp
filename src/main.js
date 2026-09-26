@@ -93,7 +93,7 @@ function renderExplore() {
     ]),
     el('aside', {
       class: 'note',
-      text: 'The sample rooms are photographs. Rooms you add stay on this device.',
+      text: 'The sample rooms are 360° photographs. Drag inside a room to look around. Rooms you add stay on this device.',
     }),
   ]);
 
@@ -161,10 +161,15 @@ function renderRoom(roomId, signal) {
   let activeId = hitboxes[0] ? hitboxes[0].id : '';
   let photo = null;
   let renderer = null;
+  let sky = null;
 
-  const canvas = el('canvas', { width: '1280', height: '720' });
-  canvas.setAttribute('aria-hidden', 'true');
-  const stage = el('div', { class: 'stage' }, [canvas, el('div', { class: 'reticle', 'aria-hidden': 'true' })]);
+  const stage = el('div', { class: 'stage' }, [el('div', { class: 'reticle', 'aria-hidden': 'true' })]);
+  let canvas = null;
+  if (!room.imageFile) {
+    canvas = el('canvas', { width: '1280', height: '720' });
+    canvas.setAttribute('aria-hidden', 'true');
+    stage.prepend(canvas);
+  }
   const detail = el('div', { class: 'detail', 'aria-live': 'polite' });
   const list = el('ul', { class: 'poi-list' });
   const panel = el('aside', { class: 'panel' }, [
@@ -200,9 +205,12 @@ function renderRoom(roomId, signal) {
     const hitbox = hitboxes.find((item) => item.id === id);
     if (!hitbox) return;
     if (aim) {
-      const look = lookYawPitch(hitboxCenterDirection(hitbox));
-      camera.yaw = look.yaw;
-      camera.pitch = clamp(look.pitch, -1.05, 1.05);
+      if (sky) sky.aim(hitbox);
+      else {
+        const look = lookYawPitch(hitboxCenterDirection(hitbox));
+        camera.yaw = look.yaw;
+        camera.pitch = clamp(look.pitch, -1.05, 1.05);
+      }
     }
     detail.replaceChildren(
       el('h3', { text: hitbox.text }),
@@ -220,6 +228,21 @@ function renderRoom(roomId, signal) {
   }
 
   function drawFrame() {
+    if (sky) {
+      const viewport = stage.getBoundingClientRect();
+      markers.forEach((marker, id) => {
+        const hitbox = hitboxes.find((item) => item.id === id);
+        const point = sky.project(hitbox, viewport);
+        if (!point) {
+          marker.hidden = true;
+          return;
+        }
+        marker.hidden = false;
+        marker.style.left = `${point.x}px`;
+        marker.style.top = `${point.y}px`;
+      });
+      return;
+    }
     if (renderer) {
       const rect = canvas.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -260,6 +283,10 @@ function renderRoom(roomId, signal) {
   }
 
   const look = (yawDelta, pitchDelta) => {
+    if (sky) {
+      sky.nudge(yawDelta, pitchDelta);
+      return;
+    }
     camera.yaw += yawDelta;
     camera.pitch = clamp(camera.pitch + pitchDelta, -1.05, 1.05);
   };
@@ -283,7 +310,7 @@ function renderRoom(roomId, signal) {
     controls,
     el('p', {
       class: 'hint',
-      text: 'Drag to look, or use the arrow keys while this page is focused. On a phone that allows it, device orientation can steer the view.',
+      text: 'Drag to look around the 360° photo, or use the arrow keys. Enter VR for a headset.',
     }),
   );
 
@@ -295,18 +322,21 @@ function renderRoom(roomId, signal) {
         const result = await eventType.requestPermission();
         if (result !== 'granted') return;
       }
-      window.addEventListener('deviceorientation', (event) => {
-        if (event.beta == null) return;
-        camera.pitch = clamp(((event.beta - 70) * Math.PI) / 180, -1.05, 1.05);
-        if (event.alpha != null) camera.yaw = (event.alpha * Math.PI) / 180;
-      }, { signal });
+      if (sky) sky.useDeviceOrientation();
+      else {
+        window.addEventListener('deviceorientation', (event) => {
+          if (event.beta == null) return;
+          camera.pitch = clamp(((event.beta - 70) * Math.PI) / 180, -1.05, 1.05);
+          if (event.alpha != null) camera.yaw = (event.alpha * Math.PI) / 180;
+        }, { signal });
+      }
       orient.disabled = true;
       orient.textContent = 'Device orientation on';
     }, { signal });
     controls.append(orient);
   }
 
-  bindLook(stage, canvas, camera, signal);
+  if (canvas) bindLook(stage, canvas, camera, signal);
   window.addEventListener('keydown', (event) => {
     const step = event.shiftKey ? 0.08 : 0.16;
     if (event.key === 'ArrowLeft') look(-step, 0);
@@ -318,6 +348,25 @@ function renderRoom(roomId, signal) {
   }, { signal });
   window.addEventListener('resize', drawFrame, { signal });
 
+  if (room.imageFile) {
+    import('./sky.js').then(({ mountPanorama }) => {
+      if (signal.aborted) return;
+      sky = mountPanorama(stage, room.imageFile);
+      signal.addEventListener('abort', () => sky.pause());
+      return sky.ready;
+    }).then(() => {
+      if (signal.aborted || !sky) return;
+      if (hitboxes[0]) select(hitboxes[0].id, true);
+      else drawFrame();
+      loop();
+    }).catch((error) => {
+      console.error(error);
+      stage.append(el('p', { class: 'fallback', text: 'The 360 view could not start in this browser. The point-of-interest list still works.' }));
+      if (hitboxes[0]) select(hitboxes[0].id, false);
+    });
+    return;
+  }
+
   try {
     renderer = createRenderer(canvas);
   } catch (error) {
@@ -327,30 +376,13 @@ function renderRoom(roomId, signal) {
   }
 
   if (!renderer) {
-    if (room.imageFile) {
-      canvas.replaceWith(el('img', { class: 'flat', src: room.imageFile, alt: '' }));
-    }
     if (hitboxes[0]) select(hitboxes[0].id, false);
     return;
   }
 
-  const start = () => {
-    if (hitboxes[0]) select(hitboxes[0].id, !scene);
-    else drawFrame();
-    loop();
-  };
-
-  if (room.imageFile) {
-    const image = new Image();
-    image.onload = () => {
-      photo = image;
-      start();
-    };
-    image.alt = '';
-    image.src = room.imageFile;
-  } else {
-    start();
-  }
+  if (hitboxes[0]) select(hitboxes[0].id, !scene);
+  else drawFrame();
+  loop();
 }
 
 function control(label, onClick) {
