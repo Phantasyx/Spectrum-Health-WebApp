@@ -9,7 +9,6 @@ import {
   lookYawPitch,
   projectDirection,
 } from './coords.js';
-import { createRenderer, thumbnailFor } from './gl.js';
 import { sampleCatalog, sceneById } from './scenes.js';
 import {
   applySampleEdits,
@@ -136,12 +135,14 @@ function roomCard(room, data) {
     if (preview) {
       media.style.backgroundImage = `url("${preview}")`;
     } else if (scene) {
-      try {
-        const thumb = thumbnailFor(scene);
-        if (thumb) media.style.backgroundImage = `url("${thumb}")`;
-      } catch (error) {
-        console.error(error);
-      }
+      import('./gl.js').then(({ thumbnailFor }) => {
+        try {
+          const thumb = thumbnailFor(scene);
+          if (thumb) media.style.backgroundImage = `url("${thumb}")`;
+        } catch (error) {
+          console.error(error);
+        }
+      }).catch((error) => console.error(error));
     }
   return el('article', { class: 'card' }, [
     media,
@@ -181,7 +182,19 @@ function renderRoom(roomId, signal) {
   let renderer = null;
   let sky = null;
 
-  const stage = el('div', { class: 'stage' }, [el('div', { class: 'reticle', 'aria-hidden': 'true' })]);
+  const caption = el('p', { class: 'stage-caption', 'aria-hidden': 'true' });
+  const stage = el('div', { class: 'stage' }, [
+    el('div', { class: 'reticle', 'aria-hidden': 'true' }),
+    caption,
+  ]);
+  if (room.poster) {
+    stage.prepend(el('img', {
+      class: 'stage-poster',
+      alt: '',
+      decoding: 'async',
+      src: room.poster,
+    }));
+  }
   let canvas = null;
   if (!room.imageFile) {
     canvas = el('canvas', { width: '1280', height: '720' });
@@ -230,6 +243,7 @@ function renderRoom(roomId, signal) {
         camera.pitch = clamp(look.pitch, -1.05, 1.05);
       }
     }
+    caption.textContent = hitbox.text;
     detail.replaceChildren(
       el('h3', { text: hitbox.text }),
       el('p', { text: hitbox.sub || 'No description was added for this point.' }),
@@ -251,16 +265,11 @@ function renderRoom(roomId, signal) {
       markers.forEach((marker, id) => {
         const hitbox = hitboxes.find((item) => item.id === id);
         const point = sky.project(hitbox, viewport);
-        if (!point) {
-          marker.hidden = true;
-          return;
-        }
-        marker.hidden = false;
-        marker.style.left = `${point.x}px`;
-        marker.style.top = `${point.y}px`;
+        placeMarker(marker, point, viewport);
       });
       return;
     }
+    if (!canvas) return;
     if (renderer) {
       const rect = canvas.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -285,14 +294,19 @@ function renderRoom(roomId, signal) {
         width: viewport.width,
         height: viewport.height,
       });
-      if (!point) {
-        marker.hidden = true;
-        return;
-      }
-      marker.hidden = false;
-      marker.style.left = `${point.x}px`;
-      marker.style.top = `${point.y}px`;
+      placeMarker(marker, point, viewport);
     });
+  }
+
+  function placeMarker(marker, point, viewport) {
+    if (!point) {
+      marker.hidden = true;
+      return;
+    }
+    marker.hidden = false;
+    marker.style.left = `${point.x}px`;
+    marker.style.top = `${point.y}px`;
+    marker.classList.toggle('label-flip', point.x > viewport.width * 0.62);
   }
 
   function loop() {
@@ -375,6 +389,7 @@ function renderRoom(roomId, signal) {
       return sky.ready;
     }).then(() => {
       if (signal.aborted || !sky) return;
+      stage.classList.add('is-ready');
       if (hitboxes[0]) select(hitboxes[0].id, true);
       else drawFrame();
       loop();
@@ -386,22 +401,31 @@ function renderRoom(roomId, signal) {
     return;
   }
 
-  try {
-    renderer = createRenderer(canvas);
-  } catch (error) {
-    renderer = null;
-    stage.append(el('p', { class: 'fallback', text: 'The 360 view could not start in this browser. The point-of-interest list still works.' }));
+  import('./gl.js').then(({ createRenderer }) => {
+    if (signal.aborted) return null;
+    try {
+      return createRenderer(canvas);
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }).then((next) => {
+    if (signal.aborted) return;
+    renderer = next;
+    if (!renderer) {
+      stage.append(el('p', { class: 'fallback', text: 'The 360 view could not start in this browser. The point-of-interest list still works.' }));
+      if (hitboxes[0]) select(hitboxes[0].id, false);
+      return;
+    }
+    if (hitboxes[0]) select(hitboxes[0].id, !scene);
+    else drawFrame();
+    loop();
+  }).catch((error) => {
     console.error(error);
-  }
-
-  if (!renderer) {
+    if (signal.aborted) return;
+    stage.append(el('p', { class: 'fallback', text: 'The 360 view could not start in this browser. The point-of-interest list still works.' }));
     if (hitboxes[0]) select(hitboxes[0].id, false);
-    return;
-  }
-
-  if (hitboxes[0]) select(hitboxes[0].id, !scene);
-  else drawFrame();
-  loop();
+  });
 }
 
 function control(label, onClick) {

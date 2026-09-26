@@ -10,7 +10,7 @@ export function mountPanorama(stage, imageUrl) {
   scene.setAttribute('device-orientation-permission-ui', 'enabled: false');
   scene.setAttribute('loading-screen', 'enabled: false');
   scene.setAttribute('renderer', 'antialias: true; colorManagement: true');
-  scene.setAttribute('background', 'color: #d5e0e2');
+  scene.setAttribute('background', 'color: #122428');
 
   const sky = document.createElement('a-sky');
   sky.setAttribute('src', imageUrl);
@@ -41,8 +41,15 @@ export function mountPanorama(stage, imageUrl) {
   return {
     scene,
     ready: new Promise((resolve) => {
-      if (scene.hasLoaded) resolve();
-      else scene.addEventListener('loaded', () => resolve(), { once: true });
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        resolve();
+      };
+      sky.addEventListener('materialtextureloaded', finish, { once: true });
+      const timeout = window.setTimeout(finish, 8000);
+      sky.addEventListener('materialtextureloaded', () => window.clearTimeout(timeout), { once: true });
     }),
     aim(hitbox) {
       const look = controls();
