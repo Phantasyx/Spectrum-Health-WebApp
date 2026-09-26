@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0f5c62" />
+    <meta
+      name="description"
+      content="Look around a 360° photograph and read labeled points of interest for orientation, training, or a facility walkthrough."
+    />
+    <title>First Look</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip" href="#content">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="#/">
+        <span class="brand-mark" aria-hidden="true">FL</span>
+        <span>
+          <span class="brand-name">First Look</span>
+          <span class="brand-sub">Room orientation</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="#/" data-nav="explore" data-shell="tour">Explore</a>
+        <a href="https://phantasyx.com" data-shell="tour">PhantasyX</a>
+        <a href="#/" data-shell="admin">View the tour</a>
+        <button type="button" class="button secondary nav-signout" id="sign-out" data-shell="admin" hidden>Sign out</button>
+      </nav>
+    </header>
+    <main id="content" class="wrap" tabindex="-1"></main>
+    <footer class="site-footer">
+      <p>First Look is from <a href="https://phantasyx.com">PhantasyX</a>. Sample photographs are CC0 via Poly Haven.</p>
+      <p class="footer-actions" data-shell="tour"><a class="button secondary" href="#/admin">Staff sign in</a></p>
+    </footer>
+    <noscript>
+      <p class="noscript">This tour needs JavaScript to draw the rooms and keep annotations in your browser.</p>
+    </noscript>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
