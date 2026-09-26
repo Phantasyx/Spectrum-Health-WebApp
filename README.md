@@ -8,7 +8,7 @@ First Look is a 2026 portfolio demo for [PhantasyX](https://phantasyx.com). It w
 
 The 2018 ASP.NET Core sources are in [`legacy/`](legacy/README.md) for provenance only. Do not deploy that folder. A database password that had been committed with those sources has been removed. Rotate it anyway, because it remains in git history.
 
-This agent could not create a second GitHub repository. To publish First Look on its own, create a repo such as `Phantasyx/first-look` and push this tree. `legacy/` can be left out of that repo.
+To publish First Look as its own repository, create `Phantasyx/first-look` and push this tree. The `legacy/` folder can be left out of that repo.
 
 ## Run locally
 
