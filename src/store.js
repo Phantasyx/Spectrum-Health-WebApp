@@ -80,3 +80,56 @@ export function saveAdditions(additions) {
 export function emptyAdditions() {
   return { buildings: [], rooms: [], hitboxes: [] };
 }
+
+const SAMPLE_KEY = 'first-look-sample-edits-v1';
+
+export function sanitizeSampleEdits(input) {
+  const source = input && typeof input === 'object' ? input : {};
+  const hitboxes = Array.isArray(source.hitboxes) ? source.hitboxes : [];
+  return {
+    hitboxes: hitboxes.slice(0, 80).map((hitbox) => {
+      const clean = cleanHitbox(hitbox);
+      return clean.id && clean.text ? clean : null;
+    }).filter(Boolean),
+  };
+}
+
+export function loadSampleEdits() {
+  try {
+    return sanitizeSampleEdits(JSON.parse(localStorage.getItem(SAMPLE_KEY) || 'null'));
+  } catch {
+    return sanitizeSampleEdits(null);
+  }
+}
+
+export function saveSampleEdit(hitbox) {
+  const current = loadSampleEdits();
+  const clean = sanitizeSampleEdits({ hitboxes: [hitbox] }).hitboxes[0];
+  if (!clean) return current;
+  const rest = current.hitboxes.filter((item) => item.id !== clean.id);
+  const next = { hitboxes: [...rest, clean] };
+  localStorage.setItem(SAMPLE_KEY, JSON.stringify(next));
+  return next;
+}
+
+export function resetSampleEdits() {
+  localStorage.removeItem(SAMPLE_KEY);
+  return sanitizeSampleEdits(null);
+}
+
+export function applySampleEdits(hitboxes, edits) {
+  const byId = new Map((edits.hitboxes || []).map((hitbox) => [hitbox.id, hitbox]));
+  return hitboxes.map((hitbox) => {
+    const edit = byId.get(hitbox.id);
+    if (!edit) return hitbox;
+    return {
+      ...hitbox,
+      text: edit.text,
+      sub: edit.sub,
+      left: edit.left,
+      right: edit.right,
+      top: edit.top,
+      bottom: edit.bottom,
+    };
+  });
+}

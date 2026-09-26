@@ -1,7 +1,9 @@
 import './style.css';
 import {
   clamp,
+  hitboxAroundUv,
   hitboxCenterDirection,
+  hitboxCenterUv,
   hitboxesOverlap,
   imageRectToHitbox,
   lookYawPitch,
@@ -9,8 +11,18 @@ import {
 } from './coords.js';
 import { createRenderer, thumbnailFor } from './gl.js';
 import { sampleCatalog, sceneById } from './scenes.js';
-import { cleanText, emptyAdditions, loadAdditions, saveAdditions } from './store.js';
+import {
+  applySampleEdits,
+  cleanText,
+  emptyAdditions,
+  loadAdditions,
+  loadSampleEdits,
+  resetSampleEdits,
+  saveAdditions,
+  saveSampleEdit,
+} from './store.js';
 import { readUpload } from './upload.js';
+import { EXAMPLE_PASSWORD, EXAMPLE_USER, isSignedIn, signIn, signOut } from './auth.js';
 
 const content = document.querySelector('#content');
 const navLinks = [...document.querySelectorAll('[data-nav]')];
@@ -31,7 +43,7 @@ function catalog() {
   return {
     buildings: [...base.buildings, ...extra.buildings],
     rooms: [...base.rooms, ...extra.rooms],
-    hitboxes: [...base.hitboxes, ...extra.hitboxes],
+    hitboxes: [...applySampleEdits(base.hitboxes, loadSampleEdits()), ...extra.hitboxes],
   };
 }
 
@@ -60,8 +72,11 @@ function render() {
   const path = (location.hash || '#/').replace(/^#/, '') || '/';
   const explore = path === '/' || path === '';
   const admin = path === '/admin';
+  document.body.classList.toggle('is-admin', admin);
+  const signOutButton = document.querySelector('#sign-out');
+  if (signOutButton) signOutButton.hidden = !(admin && isSignedIn());
   navLinks.forEach((link) => {
-    const current = (link.dataset.nav === 'admin' && admin) || (link.dataset.nav === 'explore' && explore);
+    const current = link.dataset.nav === 'explore' && explore;
     if (current) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   });
@@ -70,7 +85,8 @@ function render() {
   if (path.startsWith('/room/')) {
     renderRoom(decodeURIComponent(path.slice('/room/'.length)), signal);
   } else if (admin) {
-    renderAdmin(signal);
+    if (!isSignedIn()) renderLogin(signal);
+    else renderAdmin(signal);
   } else {
     renderExplore();
   }
@@ -90,12 +106,11 @@ function renderExplore() {
       el('div', { class: 'actions' }, [
         el('a', { class: 'button', href: '#/room/sample-operating', text: 'Start in the operating room' }),
         el('a', { class: 'button secondary', href: '#/room/sample-office', text: 'Try a sample' }),
-        el('a', { class: 'button secondary', href: '#/admin', text: 'Annotate a room' }),
       ]),
     ]),
     el('aside', {
       class: 'note',
-      text: 'Sample photographs are ready to open, so you do not need a file of your own. A room you add stays in this browser.',
+      text: 'Sample photographs are ready to open, so you can look around without uploading a file.',
     }),
   ]);
 
@@ -427,6 +442,35 @@ function bindLook(stage, canvas, camera, signal) {
   }, { signal, passive: false });
 }
 
+function renderLogin(signal) {
+  setTitle('Sign in');
+  const status = el('p', { class: 'status', role: 'status' });
+  const user = el('input', { id: 'admin-user', type: 'text', autocomplete: 'username', required: 'required' });
+  const password = el('input', { id: 'admin-password', type: 'password', autocomplete: 'current-password', required: 'required' });
+  const form = el('form', {}, [
+    el('label', {}, ['Name', user]),
+    el('label', {}, ['Password', password]),
+    el('button', { class: 'button', type: 'submit', text: 'Sign in' }),
+    status,
+  ]);
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!signIn(user.value, password.value)) {
+      status.textContent = 'That name or password does not match the example account.';
+      status.classList.add('error');
+      return;
+    }
+    render();
+  }, { signal });
+  content.append(el('section', { class: 'login-card' }, [
+    el('p', { class: 'kicker', text: 'Annotate' }),
+    el('h1', { text: 'Sign in' }),
+    el('p', { text: 'Sign in to edit points of interest and add rooms. Changes stay in this browser.' }),
+    el('p', { class: 'hint', text: `Example account: ${EXAMPLE_USER} / ${EXAMPLE_PASSWORD}` }),
+    form,
+  ]));
+}
+
 function renderAdmin(signal) {
   setTitle('Annotate');
   const data = catalog();
@@ -694,8 +738,10 @@ function renderAdmin(signal) {
 
   const manage = el('aside', { class: 'panel stack' }, [
     el('h2', { text: 'Rooms in this browser' }),
-    el('p', { class: 'hint', text: 'Sample rooms stay in the tour. Rooms you add can be removed here. Deleting a building also removes the rooms and points of interest saved under it.' }),
+    el('p', { class: 'hint', text: 'Edit a sample point to change its name, description, or place in the photograph. Rooms you add can be removed here. Deleting a building also removes the rooms and points saved under it.' }),
   ]);
+  const editorHost = el('div', { id: 'poi-editor' });
+  manage.append(editorHost);
   data.buildings.forEach((building) => {
     const rooms = data.rooms.filter((room) => room.buildingId === building.id);
     const block = el('section', {}, [el('h3', { text: building.name })]);
@@ -703,6 +749,19 @@ function renderAdmin(signal) {
       const row = el('div', { class: 'room-row' }, [
         el('a', { href: `#/room/${encodeURIComponent(room.id)}`, text: room.name }),
       ]);
+      if (room.sample) {
+        const points = data.hitboxes.filter((hitbox) => hitbox.roomId === room.id);
+        const list = el('ul', { class: 'poi-list' });
+        points.forEach((hitbox) => {
+          const edit = el('button', { type: 'button', class: 'button quiet', text: 'Edit' });
+          edit.addEventListener('click', () => openPointEditor(hitbox, room), { signal });
+          list.append(el('li', { class: 'room-row' }, [
+            el('span', { text: hitbox.text }),
+            edit,
+          ]));
+        });
+        block.append(list);
+      }
       if (!room.sample) {
         const remove = el('button', { type: 'button', class: 'button quiet', text: 'Delete' });
         remove.addEventListener('click', () => {
@@ -734,6 +793,92 @@ function renderAdmin(signal) {
     manage.append(block);
   });
 
+  function openPointEditor(hitbox, room) {
+    const center = hitboxCenterUv(hitbox);
+    let placement = { u: center.u, v: center.v };
+    const title = el('input', { type: 'text', maxlength: '255', value: hitbox.text });
+    const body = el('textarea', { maxlength: '1000' });
+    body.value = hitbox.sub || '';
+    const canvas = el('canvas', { width: '640', height: '320', 'aria-label': `Photograph of ${room.name}. Click where this point should sit.` });
+    const note = el('p', { class: 'status', role: 'status' });
+    const img = new Image();
+    img.onload = () => {
+      const maxWidth = 640;
+      const scale = Math.min(1, maxWidth / img.width);
+      canvas.width = Math.max(2, Math.round(img.width * scale));
+      canvas.height = Math.max(2, Math.round(img.height * scale));
+      drawPlacement();
+    };
+    img.alt = '';
+    img.src = room.imageFile;
+
+    function drawPlacement() {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (img.complete && img.naturalWidth) ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const x = placement.u * canvas.width;
+      const y = placement.v * canvas.height;
+      ctx.beginPath();
+      ctx.arc(x, y, 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#0f5c62';
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#f4efe4';
+      ctx.stroke();
+    }
+
+    canvas.addEventListener('pointerdown', (event) => {
+      const point = canvasPoint(event, canvas);
+      placement = {
+        u: clamp(point.x / canvas.width, 0.02, 0.98),
+        v: clamp(point.y / canvas.height, 0.02, 0.98),
+      };
+      drawPlacement();
+    }, { signal });
+
+    const save = el('button', { type: 'button', class: 'button', text: 'Save point' });
+    save.addEventListener('click', () => {
+      const nextTitle = cleanText(title.value, 255);
+      if (!nextTitle) {
+        note.textContent = 'Add a title for this point.';
+        note.classList.add('error');
+        return;
+      }
+      const box = hitboxAroundUv(placement.u, placement.v);
+      saveSampleEdit({
+        ...box,
+        id: hitbox.id,
+        roomId: hitbox.roomId,
+        text: nextTitle,
+        sub: cleanText(body.value, 1000),
+      });
+      render();
+    }, { signal });
+    const cancel = el('button', { type: 'button', class: 'button secondary', text: 'Cancel' });
+    cancel.addEventListener('click', () => {
+      editorHost.replaceChildren();
+    }, { signal });
+
+    editorHost.replaceChildren(el('div', { class: 'poi-edit' }, [
+      el('h3', { text: `Edit ${hitbox.text}` }),
+      el('p', { class: 'hint', text: `Click the photograph to move this point in ${room.name}.` }),
+      canvas,
+      el('label', {}, ['Title', title]),
+      el('label', {}, ['Description', body]),
+      el('div', { class: 'form-actions' }, [save, cancel]),
+      note,
+    ]));
+    editorHost.scrollIntoView({ block: 'nearest' });
+  }
+
+  const resetSamples = el('button', { type: 'button', class: 'button secondary', text: 'Reset sample points' });
+  resetSamples.addEventListener('click', () => {
+    if (!window.confirm('Put every sample point back to its original name, description, and place?')) return;
+    resetSampleEdits();
+    render();
+  }, { signal });
+  manage.append(resetSamples);
+
   const reset = el('button', { type: 'button', class: 'button secondary', text: 'Clear rooms added in this browser' });
   reset.addEventListener('click', () => {
     if (!window.confirm('Remove every room added in this browser? The sample tour stays.')) return;
@@ -744,11 +889,11 @@ function renderAdmin(signal) {
 
   content.append(
     el('div', {}, [
-      el('p', { class: 'kicker', text: 'Add a room' }),
-      el('h1', { text: 'Annotate a room' }),
+      el('p', { class: 'kicker', text: 'Annotate' }),
+      el('h1', { text: 'Rooms and points' }),
       el('p', {
         class: 'lede',
-        text: 'Open a sample photograph if you have nothing to upload, or add your own panorama. Name what someone should notice, then save the room in this browser.',
+        text: 'Edit a sample point, or add a room from a sample photograph or your own panorama. What you save stays in this browser.',
       }),
     ]),
     el('div', { class: 'layout-admin' }, [form, manage]),
@@ -771,6 +916,12 @@ function setStatus(message, isError) {
   node.textContent = message;
   node.classList.toggle('error', Boolean(isError));
 }
+
+document.querySelector('#sign-out')?.addEventListener('click', () => {
+  signOut();
+  if ((location.hash || '#/') === '#/admin') render();
+  else location.hash = '#/admin';
+});
 
 window.addEventListener('hashchange', render);
 render();

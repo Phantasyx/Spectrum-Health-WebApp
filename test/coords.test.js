@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   directionFromUv,
   hitboxCenterDirection,
+  hitboxCenterUv,
   hitboxesOverlap,
   imageRectToHitbox,
   lookYawPitch,
@@ -76,6 +77,21 @@ test('sample rooms use the photographs and valid hitboxes', () => {
     assert.equal(room.scene, '');
     assert.ok(room.credit);
   }
+  const byRoom = Object.fromEntries(catalog.rooms.map((room) => [
+    room.id,
+    catalog.hitboxes.filter((hitbox) => hitbox.roomId === room.id).map((hitbox) => hitbox.text),
+  ]));
+  assert.deepEqual(byRoom['sample-operating'], ['Operating table', 'Surgical light', 'Anesthesia machine', 'Monitors']);
+  assert.deepEqual(byRoom['sample-treatment'], ['Hospital bed', 'Headwall', 'Window', 'Visitor chair']);
+  assert.deepEqual(byRoom['sample-patient'], ['Hospital bed', 'Window', 'Chair', 'Wall panels']);
+  const bed = hitboxCenterUv(catalog.hitboxes.find((hitbox) => hitbox.id === 'tx-bed'));
+  assert.ok(Math.abs(bed.u - 0.5) < 0.03);
+  assert.ok(bed.v > 0.55 && bed.v < 0.7);
+  const chair = hitboxCenterUv(catalog.hitboxes.find((hitbox) => hitbox.id === 'pt-chair'));
+  assert.ok(chair.u > 0.8);
+  assert.ok(chair.v > 0.68);
+  const monitors = hitboxCenterUv(catalog.hitboxes.find((hitbox) => hitbox.id === 'or-monitors'));
+  assert.ok(monitors.u > 0.65 && monitors.u < 0.8);
   for (const hotspot of catalog.hitboxes) {
     assert.ok(hotspot.left >= 0 && hotspot.right <= 1);
     assert.ok(hotspot.bottom >= 0 && hotspot.top <= 1);

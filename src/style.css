@@ -122,6 +122,62 @@ a:hover { color: var(--teal); }
   color: #f7f4ee;
 }
 
+.nav-signout {
+  min-height: 40px;
+  padding: 0.4rem 0.85rem;
+}
+
+body.is-admin {
+  background: #e4ecee;
+}
+
+body.is-admin .site-header {
+  background: #12343a;
+  color: #f7f4ee;
+  border-bottom-color: #12343a;
+}
+
+body.is-admin .brand,
+body.is-admin .site-nav a,
+body.is-admin .brand-sub {
+  color: #f7f4ee;
+}
+
+body.is-admin .nav-signout {
+  color: #f7f4ee;
+  border-color: rgba(247, 244, 238, 0.55);
+}
+
+body.is-admin [data-shell="tour"] { display: none; }
+body:not(.is-admin) [data-shell="admin"] { display: none; }
+
+.login-card {
+  width: min(440px, 100%);
+  margin: 2rem auto;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  padding: 1.25rem 1.3rem 1.4rem;
+}
+
+.login-card form { display: grid; gap: 0.8rem; }
+
+.poi-edit {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--line);
+}
+
+.poi-edit canvas {
+  width: 100%;
+  height: auto;
+  border-radius: 0.7rem;
+  background: var(--stage);
+  cursor: crosshair;
+}
+
 .wrap {
   width: min(1120px, calc(100% - 2rem));
   margin: 0 auto;

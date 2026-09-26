@@ -2,7 +2,9 @@
 
 First Look is a browser room tour. A visitor can look around a 360° photograph and read labeled points of interest for orientation, training, or a facility walkthrough.
 
-Sample photographs are ready to open, including care rooms, an office, a market hall, and a lakeshore, so Annotate and Explore work without a file upload. A room you add stays in this browser.
+Sample photographs are ready to open, including care rooms, an office, a market hall, and a lakeshore, so you can look around without uploading a file.
+
+Explore is the public tour. Annotate is the sign-in page for editing sample points and adding rooms. The example account is admin, and the password is firstlook. Edits stay in this browser. Sample points can be reset to the original labels.
 
 The care rooms are CC0 photographs by Oliksiy Yakovlyev. The office is by Sergej Majboroda, the market hall by Andreas Mischok, and the lakeshore by Greg Zaal. All are CC0 via [Poly Haven](https://polyhaven.com/).
 

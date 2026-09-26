@@ -47,6 +47,23 @@ export function imageRectToHitbox(x0, y0, x1, y1, width, height) {
   };
 }
 
+export function hitboxAroundUv(u, v, halfU = 0.045, halfV = 0.055) {
+  const vTop = clamp(v - halfV, 0, 1);
+  const vBottom = clamp(v + halfV, 0, 1);
+  return {
+    left: clamp(u - halfU, 0, 1),
+    right: clamp(u + halfU, 0, 1),
+    top: 1 - vTop,
+    bottom: 1 - vBottom,
+  };
+}
+
+export function hitboxCenterUv(hitbox) {
+  const u = (hitbox.left + hitbox.right) / 2;
+  const fromBottom = (hitbox.top + hitbox.bottom) / 2;
+  return { u, v: 1 - fromBottom };
+}
+
 export function hitboxCenterDirection(hitbox) {
   const u = (hitbox.left + hitbox.right) / 2;
   const fromBottom = (hitbox.top + hitbox.bottom) / 2;

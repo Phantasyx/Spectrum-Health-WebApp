@@ -22,14 +22,15 @@
         </span>
       </a>
       <nav class="site-nav" aria-label="Site">
-        <a href="#/" data-nav="explore">Explore</a>
-        <a href="#/admin" data-nav="admin">Annotate</a>
-        <a href="https://phantasyx.com">PhantasyX</a>
+        <a href="#/" data-nav="explore" data-shell="tour">Explore</a>
+        <a href="https://phantasyx.com" data-shell="tour">PhantasyX</a>
+        <a href="#/" data-shell="admin">View the tour</a>
+        <button type="button" class="button secondary nav-signout" id="sign-out" data-shell="admin" hidden>Sign out</button>
       </nav>
     </header>
     <main id="content" class="wrap" tabindex="-1"></main>
     <footer class="site-footer">
-      <p>First Look is from <a href="https://phantasyx.com">PhantasyX</a>. Sample photographs are CC0 via Poly Haven.</p>
+      <p>First Look is from <a href="https://phantasyx.com">PhantasyX</a>. Sample photographs are CC0 via Poly Haven. <a href="#/admin" data-shell="tour">Staff sign in</a></p>
     </footer>
     <noscript>
       <p class="noscript">This tour needs JavaScript to draw the rooms and keep annotations in your browser.</p>
