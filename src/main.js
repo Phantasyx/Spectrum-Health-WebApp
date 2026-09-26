@@ -81,11 +81,11 @@ function renderExplore() {
   const data = catalog();
   const hero = el('section', { class: 'hero' }, [
     el('div', {}, [
-      el('p', { class: 'kicker', text: 'PhantasyX portfolio example' }),
+      el('p', { class: 'kicker', text: 'Browser room tours' }),
       el('h1', { text: 'See the room before you arrive' }),
       el('p', {
         class: 'lede',
-        text: 'First Look is a PhantasyX example of a browser room tour. A visitor can look around a 360° photograph and read labeled points of interest, the kind of orientation a facility might use for training or a walkthrough before someone arrives.',
+        text: 'Look around a 360° photograph and read labeled points of interest. First Look is for orientation, training, and facility walkthroughs.',
       }),
       el('div', { class: 'actions' }, [
         el('a', { class: 'button', href: '#/room/sample-operating', text: 'Start in the operating room' }),
@@ -147,7 +147,7 @@ function renderRoom(roomId, signal) {
     setTitle('Room not found');
     content.append(
       el('h1', { text: 'That room is not in this browser' }),
-      el('p', { text: 'It may have been cleared with the local demo data.' }),
+      el('p', { text: 'It may have been cleared from this browser.' }),
       el('a', { class: 'button', href: '#/', text: 'Back to rooms' }),
     );
     return;

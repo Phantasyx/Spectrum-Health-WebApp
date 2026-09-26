@@ -1,6 +1,6 @@
 {
   "name": "first-look",
-  "description": "Browser room tours with labeled points of interest. A PhantasyX portfolio example.",
+  "description": "Browser room tours with labeled points of interest for orientation, training, or facility walkthroughs.",
   "private": true,
   "type": "module",
   "scripts": {

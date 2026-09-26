@@ -1,6 +1,6 @@
 # First Look
 
-First Look is a PhantasyX portfolio example of a browser room tour. A visitor can look around a 360° photograph and read labeled points of interest, the kind of orientation a facility might use for training or a walkthrough before someone arrives. It is not a client product.
+First Look is a browser room tour. A visitor can look around a 360° photograph and read labeled points of interest for orientation, training, or a facility walkthrough.
 
 Sample photographs are ready to open, including care rooms, an office, a market hall, and a lakeshore, so Annotate and Explore work without a file upload. A room you add stays in this browser.
 

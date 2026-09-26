@@ -494,6 +494,8 @@ textarea { min-height: 6.5rem; resize: vertical; }
 
 .site-footer p { width: min(1120px, 100%); margin: 0.2rem auto; }
 
+.site-footer a { color: inherit; }
+
 .noscript {
   margin: 1rem;
   padding: 1rem;
