@@ -5,6 +5,7 @@
 //-----------------------------------------------------------------------------
 namespace SHVRAPI.Data
 {
+    using System;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Design;
 
@@ -21,10 +22,16 @@ namespace SHVRAPI.Data
         /// <returns> Returns new <see cref="ApplicationDbContext"/> class </returns>
         public ApplicationDbContext CreateDbContext(string[] args)
         {
-            // Connection also occurs in Startup.cs
+            // Connection also occurs in Startup.cs. Credentials stay out of source control.
+            var connectionString = Environment.GetEnvironmentVariable("SHVR_CONNECTION_STRING");
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new InvalidOperationException(
+                    "Set the SHVR_CONNECTION_STRING environment variable before running design-time database commands.");
+            }
+
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-            optionsBuilder.UseSqlServer("Server=tcp:shvr.database.windows.net,1433;Initial Catalog=SHVR;Persist Security Info=False;User ID=shvr;Password=83skDnPVC-qp8xm};" +
-                "MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+            optionsBuilder.UseSqlServer(connectionString);
 
             return new ApplicationDbContext(optionsBuilder.Options);
         }
