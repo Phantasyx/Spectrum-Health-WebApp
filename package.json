@@ -1,6 +1,6 @@
 {
   "name": "first-look",
-  "description": "Look around photographed care rooms.",
+  "description": "Look around 360° photographs of care rooms.",
   "private": true,
   "type": "module",
   "scripts": {
