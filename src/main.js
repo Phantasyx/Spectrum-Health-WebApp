@@ -93,7 +93,7 @@ function renderExplore() {
     ]),
     el('aside', {
       class: 'note',
-      text: 'Sample rooms are drawn in the browser. Rooms you add stay on this device.',
+      text: 'The sample rooms are photographs. Rooms you add stay on this device.',
     }),
   ]);
 
@@ -115,16 +115,17 @@ function roomCard(room, data) {
   const count = data.hitboxes.filter((hitbox) => hitbox.roomId === room.id).length;
     const scene = sceneById(room.scene);
     const media = el('div', { class: 'card-media', role: 'img', 'aria-label': `${room.name} preview` });
-    if (scene) {
+    const preview = room.poster || room.imageFile;
+    if (preview) {
+      media.style.backgroundImage = `url("${preview}")`;
+    } else if (scene) {
       try {
         const thumb = thumbnailFor(scene);
         if (thumb) media.style.backgroundImage = `url("${thumb}")`;
       } catch (error) {
         console.error(error);
       }
-    } else if (room.imageFile) {
-    media.style.backgroundImage = `url("${room.imageFile}")`;
-  }
+    }
   return el('article', { class: 'card' }, [
     media,
     el('div', { class: 'card-body' }, [

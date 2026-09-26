@@ -3,14 +3,13 @@ import test from 'node:test';
 import {
   directionFromUv,
   hitboxCenterDirection,
-  hitboxFromPoint,
   hitboxesOverlap,
   imageRectToHitbox,
   lookYawPitch,
   projectDirection,
   uvFromDirection,
 } from '../src/coords.js';
-import { SCENES, sampleCatalog } from '../src/scenes.js';
+import { sampleCatalog } from '../src/scenes.js';
 import { sanitizeAdditions } from '../src/store.js';
 
 test('equirectangular UV round-trips through a direction', () => {
@@ -56,20 +55,24 @@ test('overlapping hitboxes are detected and separated ones are not', () => {
   assert.equal(hitboxesOverlap(a, c), false);
 });
 
-test('sample scenes stay inside the renderer limits and the panorama seam', () => {
+test('sample rooms use the three photographs and valid hitboxes', () => {
   const catalog = sampleCatalog();
   assert.equal(catalog.rooms.length, 3);
-  assert.equal(catalog.hitboxes.length, 15);
-  for (const scene of SCENES) {
-    assert.ok(scene.boxes.length <= 16);
-    for (const hotspot of scene.hotspots) {
-      assert.ok(hotspot.left >= 0 && hotspot.right <= 1);
-      assert.ok(hotspot.bottom >= 0 && hotspot.top <= 1);
-      assert.ok(hotspot.top > hotspot.bottom);
-      assert.ok(hotspot.right - hotspot.left > 0.02);
-      const rebuilt = hitboxFromPoint(hotspot.at);
-      assert.ok(Math.abs(rebuilt.left - hotspot.left) < 1e-9);
-    }
+  assert.equal(catalog.hitboxes.length, 12);
+  for (const room of catalog.rooms) {
+    assert.match(room.imageFile, /^\/photos\/.+\.jpg$/);
+    assert.match(room.poster, /^\/photos\/.+\.jpg$/);
+    assert.equal(room.scene, '');
+  }
+  for (const hotspot of catalog.hitboxes) {
+    assert.ok(hotspot.left >= 0 && hotspot.right <= 1);
+    assert.ok(hotspot.bottom >= 0 && hotspot.top <= 1);
+    assert.ok(hotspot.top > hotspot.bottom);
+    assert.ok(hotspot.right - hotspot.left > 0.02);
+    const [x, y, z] = hitboxCenterDirection(hotspot);
+    const uv = uvFromDirection(x, y, z);
+    assert.ok(uv.u > 0 && uv.u < 1);
+    assert.ok(uv.v > 0 && uv.v < 1);
   }
 });
 

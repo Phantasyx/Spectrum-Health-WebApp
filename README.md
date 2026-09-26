@@ -1,6 +1,8 @@
 # First Look
 
-Look around an illustrated care room and read what is in it. Upload a panorama and mark new points of interest. Additions stay in this browser.
+Look around a photographed care room and read what is in it. Upload a panorama and mark new points of interest. Additions stay in this browser.
+
+The three sample rooms are CC0 photographs by Oliksiy Yakovlyev from [Poly Haven](https://polyhaven.com/hdris/interiors/retail-commercial/medical-healthcare).
 
 Public site: [https://firstlook.phantasyx.com](https://firstlook.phantasyx.com)
 
