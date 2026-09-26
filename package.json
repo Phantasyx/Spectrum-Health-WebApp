@@ -1,5 +1,6 @@
 {
   "name": "first-look",
+  "description": "Browser tour of illustrated care rooms. A PhantasyX portfolio demo.",
   "private": true,
   "type": "module",
   "scripts": {
