@@ -1,9 +1,8 @@
 import { defineConfig } from 'vite';
 
-// Relative asset URLs so dist/ can be copied to any folder,
-// including phantasyx.com/examples/first-look/ or GitHub Pages.
+// Site root. The intended host is https://firstlook.phantasyx.com/
 export default defineConfig({
-  base: './',
+  base: '/',
   build: {
     outDir: 'dist',
     emptyOutDir: true,

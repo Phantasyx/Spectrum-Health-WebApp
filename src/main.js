@@ -80,7 +80,7 @@ function renderExplore() {
   const data = catalog();
   const hero = el('section', { class: 'hero' }, [
     el('div', {}, [
-      el('p', { class: 'kicker', text: 'Portfolio demo · PhantasyX' }),
+      el('p', { class: 'kicker', text: 'First Look' }),
       el('h1', { text: 'See the room before you arrive' }),
       el('p', {
         class: 'lede',
@@ -88,12 +88,12 @@ function renderExplore() {
       }),
       el('div', { class: 'actions' }, [
         el('a', { class: 'button', href: '#/room/sample-operating', text: 'Start in the operating room' }),
-        el('a', { class: 'button secondary', href: '#/admin', text: 'Open the annotation portal' }),
+        el('a', { class: 'button secondary', href: '#/admin', text: 'Annotate a room' }),
       ]),
     ]),
     el('aside', {
       class: 'note',
-      text: 'Rebuilt from an early student project that used 360° photos and a staff form for marking points of interest. These sample rooms are drawn in the browser. Rooms you add stay on this device and are not uploaded.',
+      text: 'Sample rooms are drawn in the browser. Rooms you add stay on this device.',
     }),
   ]);
 
@@ -658,9 +658,9 @@ function renderAdmin(signal) {
 
   content.append(
     el('div', {}, [
-      el('p', { class: 'kicker', text: 'Staff portal' }),
+      el('p', { class: 'kicker', text: 'Add a room' }),
       el('h1', { text: 'Annotate a room' }),
-      el('p', { class: 'lede', text: 'The student project had a screen for uploading a panorama and naming what someone would be looking at. This page is that workflow, saved only in this browser.' }),
+      el('p', { class: 'lede', text: 'Upload a panorama, name what someone should notice, and save it in this browser.' }),
     ]),
     el('div', { class: 'layout-admin' }, [form, manage]),
   );
