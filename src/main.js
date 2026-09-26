@@ -50,8 +50,8 @@ function el(tag, attrs = {}, children = []) {
 
 function setTitle(title) {
   document.title = title
-    ? `${title} · Spectrum Health Virtual Reality Experience`
-    : 'Spectrum Health Virtual Reality Experience';
+    ? `${title} · First Look`
+    : 'First Look';
 }
 
 function render() {
@@ -80,11 +80,11 @@ function renderExplore() {
   const data = catalog();
   const hero = el('section', { class: 'hero' }, [
     el('div', {}, [
-      el('p', { class: 'kicker', text: 'Portfolio example · static demo' }),
-      el('h1', { text: 'Spectrum Health Virtual Reality Experience' }),
+      el('p', { class: 'kicker', text: 'Portfolio demo · PhantasyX' }),
+      el('h1', { text: 'See the room before you arrive' }),
       el('p', {
         class: 'lede',
-        text: 'Patients and families can look through a facility from a browser before they arrive. Items in the room are named and explained, which is what this tour was built to do.',
+        text: 'First Look is a browser tour of a care room. Drag to look around, then read a plain-language label for the table, the lights, and the monitors.',
       }),
       el('div', { class: 'actions' }, [
         el('a', { class: 'button', href: '#/room/sample-operating', text: 'Start in the operating room' }),
@@ -93,7 +93,7 @@ function renderExplore() {
     ]),
     el('aside', {
       class: 'note',
-      text: 'The original app used 360° photographs, A-Frame, and an ASP.NET Core portal backed by SQL Server. This demo keeps that tour and the staff workflow of adding a room, uploading a panorama, and marking points of interest. Additions stay in this browser.',
+      text: 'Rebuilt from an early student project that used 360° photos and a staff form for marking points of interest. These sample rooms are drawn in the browser. Rooms you add stay on this device and are not uploaded.',
     }),
   ]);
 
@@ -282,7 +282,7 @@ function renderRoom(roomId, signal) {
     controls,
     el('p', {
       class: 'hint',
-      text: 'Drag to look, or use the arrow keys while this page is focused. Original headsets such as Cardboard were supported by the browser viewer; this demo also offers device orientation on phones that allow it.',
+      text: 'Drag to look, or use the arrow keys while this page is focused. On a phone that allows it, device orientation can steer the view.',
     }),
   );
 
@@ -546,7 +546,7 @@ function renderAdmin(signal) {
 
   const form = el('form', { class: 'form-grid', id: 'admin-form' }, [
     el('h2', { text: 'Add a room' }),
-    el('p', { class: 'hint', text: 'Upload an equirectangular 360° image, the format stored on each room in the original portal. Drag a rectangle around an item, name it, then save. Nothing is sent to a server.' }),
+    el('p', { class: 'hint', text: 'Upload an equirectangular 360° image. Drag a rectangle around an item, name it, then save. Nothing is sent to a server.' }),
     el('label', {}, ['Panorama', fileInput]),
     canvas,
     el('label', {}, ['Building', buildingSelect]),
@@ -608,7 +608,7 @@ function renderAdmin(signal) {
 
   const manage = el('aside', { class: 'panel stack' }, [
     el('h2', { text: 'Rooms in this browser' }),
-    el('p', { class: 'hint', text: 'Sample rooms stay in the tour. Rooms you add can be removed here. The original portal deleted a building’s rooms and hitboxes together; this does the same for rooms saved locally.' }),
+    el('p', { class: 'hint', text: 'Sample rooms stay in the tour. Rooms you add can be removed here. Deleting a building also removes the rooms and points of interest saved under it.' }),
   ]);
   data.buildings.forEach((building) => {
     const rooms = data.rooms.filter((room) => room.buildingId === building.id);
@@ -660,7 +660,7 @@ function renderAdmin(signal) {
     el('div', {}, [
       el('p', { class: 'kicker', text: 'Staff portal' }),
       el('h1', { text: 'Annotate a room' }),
-      el('p', { class: 'lede', text: 'Spectrum Health staff used the companion portal to add rooms, upload 360° images, and mark what a patient would be looking at. This page is that workflow without the login or the database.' }),
+      el('p', { class: 'lede', text: 'The student project had a screen for uploading a panorama and naming what someone would be looking at. This page is that workflow, saved only in this browser.' }),
     ]),
     el('div', { class: 'layout-admin' }, [form, manage]),
   );

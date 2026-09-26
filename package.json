@@ -1,5 +1,5 @@
 {
-  "name": "shvr-demo",
+  "name": "first-look",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,6 +9,7 @@
     "test": "node --test test/*.test.js"
   },
   "devDependencies": {
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "wrangler": "^4.40.0"
   }
 }

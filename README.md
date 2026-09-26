@@ -1,31 +1,20 @@
-# Spectrum Health Virtual Reality Experience
+# First Look
 
-Based in Grand Rapids, Michigan, Spectrum Health is a not-for-profit integrated health-care system including 12 hospitals,
-8 urgent care facilities and 48 lab centers, making them the largest employer in West Michigan.
-For patients and their families, a trip to a hospital or other medical facility is often confusing and stressful.
-Strange devices, some rather large and others rather intimidating, seem to be everywhere.
-The Spectrum Health Virtual Reality Experience app gives patients and their families the ability to explore Spectrum Health’s many
-facilities virtually, from the convenience and comfort of home.
-Patients enjoy an interactive experience with a full 360° view. As they look around, items in the room are identified and explained.
-From operating rooms to treatment rooms to patient rooms, users learn what’s what before ever entering a Spectrum Health facility,
-thereby reducing confusion and stress.
-The Spectrum Health Virtual Reality Experience app runs within any desktop or mobile web browser. In addition, the app supports various
-virtual reality devices such as an Oculus Rift or a Google Cardboard to provide a completely immersive experience.
-Spectrum Health employees use our companion administrative web portal to add new rooms, which includes uploading 360° images and
-annotating points of interest within a room.
-The Virtual Reality Experience app is written in HTML and JavaScript. A-Frame is used for 360° image browser support. ASP.NET Core
-and MSSQL provide server integration.
+A static web app for looking around an illustrated care room and reading a plain-language label for the things in it. A second screen lets you upload a panorama and mark new points of interest. Those additions stay in the browser.
 
-## Portfolio demo
+## What this is
 
-The public 360° viewer is not in this repository (the admin portal, models, and services are). `demo/` is a static reconstruction of the same product: browse a facility, look around a room, read each point of interest, and use the staff flow to upload a panorama and mark items. Sample rooms are illustrated stand-ins, not photographs of a Spectrum Health facility. Rooms you add stay in the browser; nothing is uploaded.
+First Look is a 2026 portfolio demo for [PhantasyX](https://phantasyx.com). It was rebuilt from early student work on a room-orientation viewer: 360° photos, labeled objects, and a form for marking them. This public version does not use that project’s organization name, logo, or outcome claims. The rooms here are illustrations, not photographs of a real facility. The labels are demo text, not medical advice, and this is not a client product.
 
-### Run locally
+The 2018 ASP.NET Core sources are in [`legacy/`](legacy/README.md) for provenance only. Do not deploy that folder. A database password that had been committed with those sources has been removed. Rotate it anyway, because it remains in git history.
+
+This agent could not create a second GitHub repository. To publish First Look on its own, create a repo such as `Phantasyx/first-look` and push this tree. `legacy/` can be left out of that repo.
+
+## Run locally
 
 Requires Node.js 20 or newer.
 
 ```bash
-cd demo
 npm install
 npm test
 npm run dev
@@ -33,30 +22,33 @@ npm run dev
 
 Open http://127.0.0.1:5173/
 
-### Build the static site
+## Build the static site
 
 ```bash
-cd demo
 npm install
 npm test
 npm run build
 ```
 
-The build writes `demo/dist/`. Copy the contents of that directory to the host path (for example `phantasyx.com/examples/spectrum-health/`, or a GitHub Pages folder). Asset URLs are relative, so the folder does not have to live at the domain root.
+The build writes `dist/`. Copy the **contents** of that directory to the host folder. Asset URLs are relative, so the folder can live at any path.
 
-After `npm run build`, the files to copy are:
+Suggested path on phantasyx.com: `/examples/first-look/`
 
-- `demo/dist/index.html`
-- `demo/dist/favicon.svg`
-- `demo/dist/assets/` (bundled CSS and JavaScript)
+After `npm run build`, copy:
 
-`npm run preview` serves that folder at http://127.0.0.1:4173/ so you can check it before copying.
+- `dist/index.html`
+- `dist/favicon.svg`
+- `dist/assets/` (bundled CSS and JavaScript; the hashed filenames change when the source changes)
 
-### Legacy ASP.NET Core app
+`npm run preview` serves that folder at http://127.0.0.1:4173/
 
-The original host targets `netcoreapp2.0` and expects SQL Server. The checked-in Azure SQL password has been removed. Put a connection string in configuration only on a machine that should reach the database:
+## Cloudflare Workers
 
-- `ConnectionStrings:DefaultConnection` in `appsettings.json` (left empty in git), or user secrets
-- `SHVR_CONNECTION_STRING` for design-time Entity Framework commands in `SHVRAPI.Data/ApplicationDbContextFactory.cs`
+`wrangler.jsonc` is an assets-only Worker: static files, no Worker script. From this directory, after a build:
 
-Do not commit credentials. Rotate the database password that used to be stored in this repository; it remains in git history.
+```bash
+npx wrangler login
+npx wrangler deploy
+```
+
+That publishes `dist/` to the Worker named `first-look`. For a path on an existing site, attach the Worker to a route such as `phantasyx.com/examples/first-look/*`. Relative asset URLs still resolve correctly when the HTML is loaded from that path. `npx wrangler check` validates the config without deploying.

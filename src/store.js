@@ -1,4 +1,4 @@
-const KEY = 'shvr-demo-additions-v1';
+const KEY = 'first-look-additions-v1';
 
 export function cleanText(value, max) {
   return String(value ?? '')

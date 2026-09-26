@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
-// Relative asset URLs so the built folder can be copied to any path,
-// including phantasyx.com/examples/spectrum-health/ or GitHub Pages.
+// Relative asset URLs so dist/ can be copied to any folder,
+// including phantasyx.com/examples/first-look/ or GitHub Pages.
 export default defineConfig({
   base: './',
   build: {
