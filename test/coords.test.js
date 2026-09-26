@@ -65,14 +65,16 @@ test('overlapping hitboxes are detected and separated ones are not', () => {
   assert.equal(hitboxesOverlap(a, c), false);
 });
 
-test('sample rooms use the three photographs and valid hitboxes', () => {
+test('sample rooms use the photographs and valid hitboxes', () => {
   const catalog = sampleCatalog();
-  assert.equal(catalog.rooms.length, 3);
-  assert.equal(catalog.hitboxes.length, 12);
+  assert.equal(catalog.rooms.length, 6);
+  assert.equal(catalog.hitboxes.length, 24);
+  assert.deepEqual(catalog.buildings.map((building) => building.name), ['Care rooms', 'More places to try']);
   for (const room of catalog.rooms) {
-    assert.match(room.imageFile, /^\/photos\/.+\.jpg$/);
-    assert.match(room.poster, /^\/photos\/.+\.jpg$/);
+    assert.match(room.imageFile, /^\/photos\/[a-z0-9-]+\.jpg$/);
+    assert.match(room.poster, /^\/photos\/[a-z0-9-]+\.jpg$/);
     assert.equal(room.scene, '');
+    assert.ok(room.credit);
   }
   for (const hotspot of catalog.hitboxes) {
     assert.ok(hotspot.left >= 0 && hotspot.right <= 1);
@@ -102,12 +104,30 @@ test('local additions drop markup, oversized text, and non-image payloads', () =
         name: 'Kept',
         imageFile: 'data:image/jpeg;base64,aaaa',
       },
+      {
+        id: 'r3',
+        buildingId: 'b1',
+        name: 'Sample copy',
+        imageFile: '/photos/office.jpg',
+      },
+      {
+        id: 'r4',
+        buildingId: 'b1',
+        name: 'Traversal',
+        imageFile: '/photos/../secret.jpg',
+      },
+      {
+        id: 'r5',
+        buildingId: 'b1',
+        name: 'Png data',
+        imageFile: 'data:image/png;base64,aaaa',
+      },
     ],
     hitboxes: [{ id: 'h1', roomId: 'r2', text: 'x'.repeat(400), sub: '<b>note</b>', top: 2, bottom: -1, left: 0.2, right: 0.1 }],
   });
   assert.equal(clean.buildings[0].name, 'North wing');
-  assert.equal(clean.rooms.length, 1);
-  assert.equal(clean.rooms[0].id, 'r2');
+  assert.deepEqual(clean.rooms.map((room) => room.id), ['r2', 'r3']);
+  assert.equal(clean.rooms[1].imageFile, '/photos/office.jpg');
   assert.equal(clean.hitboxes[0].text.length, 255);
   assert.equal(clean.hitboxes[0].sub, '<b>note</b>');
   assert.equal(clean.hitboxes[0].top, 1);

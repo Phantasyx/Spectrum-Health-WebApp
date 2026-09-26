@@ -1,3 +1,5 @@
+import { isSampleImagePath } from './upload.js';
+
 const KEY = 'first-look-additions-v1';
 
 export function cleanText(value, max) {
@@ -29,8 +31,9 @@ function cleanHitbox(hitbox) {
 }
 
 function cleanImage(value) {
-  const image = String(value ?? '');
-  if (!/^data:image\/(jpeg|png|webp);base64,[a-z0-9+/=\s]+$/i.test(image)) return '';
+  const image = String(value ?? '').trim();
+  if (isSampleImagePath(image)) return image;
+  if (!/^data:image\/jpeg;base64,[a-z0-9+/=\s]+$/i.test(image)) return '';
   if (image.length > 2_500_000) return '';
   return image;
 }

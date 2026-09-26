@@ -10,6 +10,7 @@ import {
 import { createRenderer, thumbnailFor } from './gl.js';
 import { sampleCatalog, sceneById } from './scenes.js';
 import { cleanText, emptyAdditions, loadAdditions, saveAdditions } from './store.js';
+import { readUpload } from './upload.js';
 
 const content = document.querySelector('#content');
 const navLinks = [...document.querySelectorAll('[data-nav]')];
@@ -80,20 +81,21 @@ function renderExplore() {
   const data = catalog();
   const hero = el('section', { class: 'hero' }, [
     el('div', {}, [
-      el('p', { class: 'kicker', text: 'First Look' }),
+      el('p', { class: 'kicker', text: 'PhantasyX portfolio example' }),
       el('h1', { text: 'See the room before you arrive' }),
       el('p', {
         class: 'lede',
-        text: 'First Look is a browser tour of a care room. Drag to look around, then read a plain-language label for the table, the lights, and the monitors.',
+        text: 'First Look is a PhantasyX example of a browser room tour. A visitor can look around a 360° photograph and read labeled points of interest, the kind of orientation a facility might use for training or a walkthrough before someone arrives.',
       }),
       el('div', { class: 'actions' }, [
         el('a', { class: 'button', href: '#/room/sample-operating', text: 'Start in the operating room' }),
+        el('a', { class: 'button secondary', href: '#/room/sample-office', text: 'Try a sample' }),
         el('a', { class: 'button secondary', href: '#/admin', text: 'Annotate a room' }),
       ]),
     ]),
     el('aside', {
       class: 'note',
-      text: 'The sample rooms are 360° photographs. Drag inside a room to look around. Rooms you add stay on this device.',
+      text: 'Sample photographs are ready to open, so you do not need a file of your own. A room you add stays in this browser.',
     }),
   ]);
 
@@ -131,6 +133,7 @@ function roomCard(room, data) {
     el('div', { class: 'card-body' }, [
       el('h3', { text: room.name }),
       el('p', { text: room.summary || 'Uploaded panorama.' }),
+      room.credit ? el('p', { text: room.credit }) : null,
       el('p', { text: `${count} point${count === 1 ? '' : 's'} of interest` }),
       el('a', { class: 'button', href: `#/room/${encodeURIComponent(room.id)}`, text: 'Look around' }),
     ]),
@@ -307,6 +310,7 @@ function renderRoom(roomId, signal) {
       el('a', { class: 'button secondary', href: '#/', text: 'All rooms' }),
     ]),
     el('div', { class: 'viewer-layout' }, [stage, panel]),
+    room.credit ? el('p', { class: 'credit', text: room.credit }) : null,
     controls,
     el('p', {
       class: 'hint',
@@ -429,6 +433,8 @@ function renderAdmin(signal) {
   const drafts = [];
   let draftRect = null;
   let image = null;
+  let prepared = null;
+  let activeSample = null;
   const status = el('p', { class: 'status', role: 'status' });
 
   const buildingSelect = el('select', { id: 'building', required: 'required' }, [
@@ -446,7 +452,11 @@ function renderAdmin(signal) {
   }, { signal });
 
   const roomName = el('input', { id: 'room-name', type: 'text', maxlength: '255', required: 'required', autocomplete: 'off' });
-  const fileInput = el('input', { id: 'panorama', type: 'file', accept: 'image/*', required: 'required' });
+  const fileInput = el('input', {
+    id: 'panorama',
+    type: 'file',
+    accept: 'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp',
+  });
   const titleInput = el('input', { id: 'poi-title', type: 'text', maxlength: '255', autocomplete: 'off' });
   const bodyInput = el('textarea', { id: 'poi-body', maxlength: '1000' });
   const canvas = el('canvas', {
@@ -457,24 +467,61 @@ function renderAdmin(signal) {
   });
   const draftList = el('ul', { class: 'draft-list' });
 
-  fileInput.addEventListener('change', () => {
-    const file = fileInput.files && fileInput.files[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
+  function showImage(img) {
+    image = img;
+    const maxWidth = 960;
+    const scale = Math.min(1, maxWidth / img.width);
+    canvas.width = Math.max(2, Math.round(img.width * scale));
+    canvas.height = Math.max(2, Math.round(img.height * scale));
+    draftRect = null;
+    drafts.splice(0, drafts.length);
+    paint();
+    refreshDrafts();
+  }
+
+  function useSample(room) {
     const img = new Image();
     img.onload = () => {
-      image = img;
-      const maxWidth = 960;
-      const scale = Math.min(1, maxWidth / img.width);
-      canvas.width = Math.max(2, Math.round(img.width * scale));
-      canvas.height = Math.max(2, Math.round(img.height * scale));
-      draftRect = null;
-      paint();
-      URL.revokeObjectURL(url);
-      setStatus('');
+      prepared = null;
+      activeSample = room;
+      fileInput.value = '';
+      showImage(img);
+      if (!cleanText(roomName.value, 255)) roomName.value = `${room.name} notes`;
+      if (!buildingSelect.value) {
+        buildingSelect.value = room.buildingId;
+        newBuildingWrap.hidden = true;
+      }
+      setStatus(`Using the sample photograph “${room.name}”. Mark a point and save it in this browser. No upload is required.`);
     };
-    img.onerror = () => setStatus('That file could not be read as an image.', true);
-    img.src = url;
+    img.onerror = () => setStatus('That sample photograph could not be loaded.', true);
+    img.src = room.imageFile;
+  }
+
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) return;
+    const result = await readUpload(file);
+    if (!result.ok) {
+      image = null;
+      prepared = null;
+      activeSample = null;
+      fileInput.value = '';
+      paint();
+      return setStatus(result.error, true);
+    }
+    const preview = new Image();
+    preview.onload = () => {
+      activeSample = null;
+      prepared = { dataUrl: result.dataUrl };
+      showImage(preview);
+      const wide = result.width / Math.max(result.height, 1);
+      const shape = wide > 1.85 && wide < 2.15
+        ? 'It will be shown as a 360° photo.'
+        : 'It is not about twice as wide as it is tall, so the room view will stretch it.';
+      setStatus(`Ready. ${shape} JPEG, PNG, and WebP are accepted up to 8 MB. The copy kept here is a JPEG, so the file name and camera data are dropped. Nothing is sent to a server.`);
+    };
+    preview.onerror = () => setStatus('The image could not be read. It may be truncated or damaged.', true);
+    preview.src = result.dataUrl;
   }, { signal });
 
   function paint() {
@@ -504,7 +551,7 @@ function renderAdmin(signal) {
   let drag = null;
   canvas.addEventListener('pointerdown', (event) => {
     if (!image) {
-      setStatus('Upload a panorama before marking a point.', true);
+      setStatus('Choose a panorama or try a sample before marking a point.', true);
       return;
     }
     const point = canvasPoint(event, canvas);
@@ -548,7 +595,7 @@ function renderAdmin(signal) {
   addPoint.addEventListener('click', () => {
     const title = cleanText(titleInput.value, 255);
     const sub = cleanText(bodyInput.value, 1000);
-    if (!image) return setStatus('Upload a panorama first.', true);
+    if (!image) return setStatus('Choose a panorama or try a sample first.', true);
     if (!title) return setStatus('Add a title for this point.', true);
     let hitbox;
     if (draftRect && draftRect.w >= 8 && draftRect.h >= 8) {
@@ -577,10 +624,23 @@ function renderAdmin(signal) {
     setStatus(`Added “${title}”.`);
   }, { signal });
 
+  const sampleButtons = data.rooms.filter((room) => room.sample).map((room) => {
+    const button = el('button', { type: 'button', class: 'button secondary', text: room.name });
+    button.addEventListener('click', () => useSample(room), { signal });
+    return button;
+  });
+
   const form = el('form', { class: 'form-grid', id: 'admin-form' }, [
     el('h2', { text: 'Add a room' }),
-    el('p', { class: 'hint', text: 'Upload an equirectangular 360° image. Drag a rectangle around an item, name it, then save. Nothing is sent to a server.' }),
-    el('label', {}, ['Panorama', fileInput]),
+    el('p', {
+      class: 'hint',
+      text: 'Try a sample photograph, or upload your own equirectangular 360° image. JPEG, PNG, and WebP only, up to 8 MB. The file has to be a complete image, and the contents have to match the type. First Look redraws an upload as a JPEG in this browser, which drops the file name and camera data. Nothing is sent to a server.',
+    }),
+    el('div', { class: 'sample-row' }, [
+      el('p', { class: 'hint', text: 'Try a sample' }),
+      ...sampleButtons,
+    ]),
+    el('label', {}, ['Your panorama, if you have one', fileInput]),
     canvas,
     el('label', {}, ['Building', buildingSelect]),
     newBuildingWrap,
@@ -595,9 +655,8 @@ function renderAdmin(signal) {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const file = fileInput.files && fileInput.files[0];
     const name = cleanText(roomName.value, 255);
-    if (!file || !image) return setStatus('Choose a panorama image.', true);
+    if (!image || (!activeSample && !prepared)) return setStatus('Choose a panorama or try a sample.', true);
     if (!name) return setStatus('Enter a room name.', true);
 
     let buildingId = buildingSelect.value;
@@ -610,13 +669,7 @@ function renderAdmin(signal) {
     }
     if (!buildingId) return setStatus('Select a building.', true);
 
-    let imageFile;
-    try {
-      imageFile = await fileToDataUrl(file);
-    } catch (error) {
-      return setStatus(error.message, true);
-    }
-    if (!imageFile) return setStatus('That image is too large to keep in this browser. Try a smaller file.', true);
+    const imageFile = activeSample ? activeSample.imageFile : prepared.dataUrl;
 
     const roomId = `local-r-${crypto.randomUUID()}`;
     additions.rooms.push({
@@ -693,7 +746,10 @@ function renderAdmin(signal) {
     el('div', {}, [
       el('p', { class: 'kicker', text: 'Add a room' }),
       el('h1', { text: 'Annotate a room' }),
-      el('p', { class: 'lede', text: 'Upload a panorama, name what someone should notice, and save it in this browser.' }),
+      el('p', {
+        class: 'lede',
+        text: 'Open a sample photograph if you have nothing to upload, or add your own panorama. Name what someone should notice, then save the room in this browser.',
+      }),
     ]),
     el('div', { class: 'layout-admin' }, [form, manage]),
   );
@@ -714,29 +770,6 @@ function setStatus(message, isError) {
   if (!node) return;
   node.textContent = message;
   node.classList.toggle('error', Boolean(isError));
-}
-
-function fileToDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      const maxWidth = 1920;
-      const scale = Math.min(1, maxWidth / img.width);
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.max(2, Math.round(img.width * scale));
-      canvas.height = Math.max(2, Math.round(img.height * scale));
-      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      URL.revokeObjectURL(url);
-      const jpeg = canvas.toDataURL('image/jpeg', 0.82);
-      resolve(jpeg.length > 2_400_000 ? '' : jpeg);
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error('That file could not be read as an image.'));
-    };
-    img.src = url;
-  });
 }
 
 window.addEventListener('hashchange', render);

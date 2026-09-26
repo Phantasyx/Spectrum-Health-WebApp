@@ -1,6 +1,6 @@
 {
   "name": "first-look",
-  "description": "Look around 360° photographs of care rooms.",
+  "description": "Browser room tours with labeled points of interest. A PhantasyX portfolio example.",
   "private": true,
   "type": "module",
   "scripts": {
